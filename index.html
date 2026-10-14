@@ -43,18 +43,19 @@
     </p>
   </div>
 <script>
-  // 必应每日壁纸直链（CSS 背景不受 CORS 限制）：加载成功才替换，失败保留渐变兜底
-  (() => {
-    const BING = "https://bing.img.run/1920x1080.php";
-    const probe = new Image();
-    probe.onload = () => {
-      document.body.style.backgroundImage =
-        'linear-gradient(rgba(252,248,242,.25),rgba(252,248,242,.25)), url("' + BING + '")';
-      document.body.style.backgroundSize = "cover";
-      document.body.style.backgroundPosition = "center";
-      document.body.style.backgroundAttachment = "fixed";
-    };
-    probe.src = BING;
+  // 必应每日壁纸：经本项目 _worker.js 的 /bg 接口（同源、边缘缓存）；失败保留渐变兜底
+  (async () => {
+    try {
+      const r = await fetch("/bg", { cache: "no-store" });
+      const d = await r.json();
+      if (d && d.ok && d.url) {
+        document.body.style.backgroundImage =
+          'linear-gradient(rgba(252,248,242,.25),rgba(252,248,242,.25)), url("' + d.url + '")';
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundPosition = "center";
+        document.body.style.backgroundAttachment = "fixed";
+      }
+    } catch (e) { /* 保留 CSS 兜底渐变 */ }
   })();
 </script>
 </body>
